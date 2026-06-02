@@ -480,6 +480,7 @@
     const ENDPOINT = '/api/stock';
 
     let lookupTimer = null;
+    let lookupPending = false;
     let zxingControls = null;
 
     // ---------- SKU lookup ----------
@@ -492,24 +493,30 @@
 
     async function lookupSkuByBarcode(barcode) {
       if (!barcode) { clearSkuName(); return; }
+      lookupPending = true;
       $('sku').value = '...';
       $('pname').value = '...';
       $('notFoundBar').classList.remove('show');
+      setStatus('');
       try {
         const res = await fetch(`${ENDPOINT}?fn=lookupBarcode&barcode=${encodeURIComponent(barcode)}`);
-        const data = await res.json().catch(() => ({}));
-        if (!data.ok) throw new Error(data.error || 'Lookup failed');
-        if (data.sku) {
+        const data = await res.json().catch(() => null);
+        if (data && data.sku) {
+          // พบสินค้าในระบบ
           $('sku').value = data.sku;
           $('pname').value = data.name || '';
         } else {
+          // ไม่พบ (ครอบคลุมทั้ง ok:false และ ok:true ที่ไม่มี sku)
           $('sku').value = 'ไม่พบ';
           $('pname').value = '';
           $('notFoundBar').classList.add('show');
         }
       } catch (e) {
+        // network error เท่านั้น
         clearSkuName();
-        setStatus('Lookup error: ' + (e?.message || e), 'err');
+        setStatus('ไม่สามารถเชื่อมต่อได้: ' + (e?.message || e), 'err');
+      } finally {
+        lookupPending = false;
       }
     }
 
@@ -617,7 +624,8 @@
     function validate(p) {
       if (!p.barcode) return 'กรุณาสแกนหรือระบุบาร์โค้ด';
       const sku = ($('sku').value || '').trim();
-      if (!sku || sku === 'ไม่พบ' || sku === '...') return 'ไม่พบ SKU — กรุณาเพิ่มสินค้าก่อน';
+      if (sku === '...') return 'กำลังตรวจสอบข้อมูล รอสักครู่แล้วลองใหม่';
+      if (!sku || sku === 'ไม่พบ') return 'ไม่พบสินค้านี้ในระบบ — กดปุ่ม "ลงทะเบียนสินค้า" ด้านบน';
       const q = Number(p.qty);
       if (!Number.isFinite(q) || q <= 0) return 'จำนวนต้องมากกว่า 0';
       const OWN = ['BKK', 'CHB'];
@@ -636,6 +644,11 @@
     async function submitEntry() {
       applyTypeRules();
       closeScan();
+      // รอ lookup ที่กำลัง pending อยู่ (กรณี scanner ส่ง Enter เร็วเกิน)
+      if (lookupPending) {
+        setStatus('กำลังตรวจสอบข้อมูล...', '');
+        await new Promise(r => setTimeout(r, 600));
+      }
       const p = {
         barcode: $('barcode').value.trim(),
         type:    $('type').value,
