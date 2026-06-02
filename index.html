@@ -206,6 +206,37 @@
     .ok { color: var(--success); }
     .err { color: var(--danger); }
 
+    .not-found-bar {
+      display: none;
+      margin-top: 12px;
+      padding: 12px 14px;
+      background: #fefce8;
+      border: 1.5px dashed #fbbf24;
+      border-radius: 10px;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .not-found-bar.show { display: flex; }
+    .not-found-label {
+      font-size: 14px;
+      font-weight: 600;
+      color: #92400e;
+    }
+    .btn-reg {
+      white-space: nowrap;
+      padding: 9px 16px;
+      font-size: 14px;
+      font-weight: 700;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .btn-reg:active { transform: scale(0.98); }
+
     .section-header {
       display: flex;
       align-items: center;
@@ -366,7 +397,12 @@
         </div>
       </div>
 
-      <div class="field">
+      <div class="not-found-bar" id="notFoundBar">
+        <span class="not-found-label">ไม่พบสินค้านี้ในระบบ</span>
+        <button class="btn-reg" type="button" onclick="goRegister()">+ ลงทะเบียนสินค้า</button>
+      </div>
+
+      <div class="field" style="margin-top:14px;">
         <label>ประเภทรายการ</label>
         <select id="type">
           <option value="IN_PURCHASE">รับเข้า — ซื้อจากผู้ขาย</option>
@@ -451,22 +487,35 @@
     function clearSkuName() {
       $('sku').value = '';
       $('pname').value = '';
+      $('notFoundBar').classList.remove('show');
     }
 
     async function lookupSkuByBarcode(barcode) {
       if (!barcode) { clearSkuName(); return; }
       $('sku').value = '...';
       $('pname').value = '...';
+      $('notFoundBar').classList.remove('show');
       try {
         const res = await fetch(`${ENDPOINT}?fn=lookupBarcode&barcode=${encodeURIComponent(barcode)}`);
         const data = await res.json().catch(() => ({}));
         if (!data.ok) throw new Error(data.error || 'Lookup failed');
-        $('sku').value = data.sku || 'ไม่พบ';
-        $('pname').value = data.name || '';
+        if (data.sku) {
+          $('sku').value = data.sku;
+          $('pname').value = data.name || '';
+        } else {
+          $('sku').value = 'ไม่พบ';
+          $('pname').value = '';
+          $('notFoundBar').classList.add('show');
+        }
       } catch (e) {
         clearSkuName();
         setStatus('Lookup error: ' + (e?.message || e), 'err');
       }
+    }
+
+    function goRegister() {
+      const barcode = $('barcode').value.trim();
+      window.location.href = 'register.html' + (barcode ? `?barcode=${encodeURIComponent(barcode)}` : '');
     }
 
     function scheduleLookup() {
@@ -641,7 +690,17 @@
       $('tableWrap').innerHTML = html + '</tbody></table>';
     }
 
-    window.onload = () => { applyTypeRules(); $('barcode').focus(); refresh(); };
+    window.onload = () => {
+      applyTypeRules();
+      const pre = new URLSearchParams(location.search).get('barcode');
+      if (pre) {
+        $('barcode').value = pre;
+        lookupSkuByBarcode(pre);
+      } else {
+        $('barcode').focus();
+      }
+      refresh();
+    };
     document.addEventListener('keydown', e => {
       if (e.key === 'Enter' && e.target?.tagName !== 'TEXTAREA') submitEntry();
     });
