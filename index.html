@@ -1,592 +1,650 @@
 <!doctype html>
 <html lang="th">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <title>ANMEC Stock</title>
-    <link rel="apple-touch-icon" href="icon.png">
-    <link rel="icon" href="icon.png">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>ANMEC Stock</title>
+  <link rel="apple-touch-icon" href="icon.png">
+  <link rel="icon" href="icon.png">
 
-    <style>
-      :root{
-        --bg:#ffffff;
-        --text:#111827;
-        --muted:#6b7280;
-        --border:#e5e7eb;
-        --soft:#f3f4f6;
-        --danger:#dc2626;
-        --ok:#0a7;
-        --radius:16px;
-      }
-      *{ box-sizing:border-box; }
-      body{
-        margin:0;
-        background:var(--bg);
-        color:var(--text);
-        font-family: system-ui, -apple-system, Arial;
-      }
-      .page{
-        width:100%;
-        max-width: 320px;
-        margin:0 auto;
-        padding:18px 12px 28px;
-      }
-      h2{
-        margin:6px 0 12px;
-        font-size:32px;
-        letter-spacing:-0.02em;
-      }
-      .card{
-        padding:14px;
-        border:1px solid var(--border);
-        border-radius:var(--radius);
-        background:#fff;
-      }
-      .field{ margin-bottom:12px; }
-      .label{
-        color:var(--muted);
-        font-size:14px;
-        margin:0 0 6px;
-      }
-      input, select, textarea{
-        width:100%;
-        border:1px solid var(--border);
-        border-radius:12px;
-        padding:10px 10px;
-        font-size:17px;
-        outline:none;
-        background:#fff;
-      }
-      textarea{ min-height:62px; resize:vertical; }
-      input:focus, select:focus, textarea:focus{
-        border-color:#cbd5e1;
-        box-shadow:0 0 0 3px rgba(59,130,246,.12);
-      }
-      .row2{
-        display:grid;
-        grid-template-columns:1fr 1fr;
-        gap:10px;
-      }
-      .actionsLabel{ margin:8px 0 8px; color:var(--muted); font-size:14px; }
-      .btnRow{
-        display:flex;
-        gap:10px;
-        justify-content:flex-end;
-        flex-wrap:wrap;
-      }
-      button{
-        border:1px solid var(--border);
-        background:var(--soft);
-        color:#2563eb;
-        padding:10px 14px;
-        font-size:17px;
-        border-radius:14px;
-        cursor:pointer;
-      }
-      button:active{ transform:scale(.99); }
-      .status{
-        margin-top:10px;
-        font-size:15px;
-        font-weight:600;
-      }
-      .ok{ color:var(--ok); }
-      .err{ color:var(--danger); }
-      .muted{
-        margin-top:10px;
-        color:var(--muted);
-        font-size:14px;
-        line-height:1.35;
-      }
-      .sectionTitle{
-        display:flex;
-        align-items:center;
-        gap:10px;
-        margin:16px 0 10px;
-        font-size:22px;
-        font-weight:800;
-        letter-spacing:-0.02em;
-      }
-      .pill{
-        display:inline-block;
-        padding:4px 10px;
-        border:1px solid var(--border);
-        border-radius:999px;
-        font-size:13px;
-        color:var(--muted);
-        font-weight:500;
-      }
-      table{ width:100%; border-collapse:collapse; margin-top: 0; }
-      th, td{
-        border-bottom: 1px solid var(--border);
-        padding:9px 6px;
-        text-align:left;
-        font-size:12.5px;
-        vertical-align:top;
-      }
-      th{
-        position:sticky;
-        top:0;
-        background:#fff;
-        z-index:1;
-      }
-      select:disabled, input:disabled{
-        background:#f3f4f6;
-        color:#9ca3af;
-      }
+  <style>
+    :root {
+      --bg: #f1f5f9;
+      --surface: #ffffff;
+      --accent: #1e3a8a;
+      --accent-mid: #2563eb;
+      --text: #0f172a;
+      --muted: #64748b;
+      --border: #cbd5e1;
+      --success: #16a34a;
+      --danger: #dc2626;
+      --radius: 14px;
+    }
 
-      .inlineRow{
-        display:flex;
-        gap:8px;
-        align-items:center;
-      }
-      .iconBtn{
-        width:44px;
-        min-width:44px;
-        height:44px;
-        padding:0;
-        display:flex;
-        align-items:center;
-        justify-content:center;
-        border-radius:12px;
-        color:#111827;
-        background:#fff;
-        border:1px solid var(--border);
-      }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
-      .modal{
-        position:fixed;
-        inset:0;
-        background:rgba(0,0,0,.45);
-        display:none;
-        align-items:center;
-        justify-content:center;
-        padding:14px;
-        z-index:9999;
-      }
-      .modal.open{ display:flex; }
-      .modalCard{
-        width:min(420px, 100%);
-        background:#fff;
-        border-radius:18px;
-        border:1px solid var(--border);
-        overflow:hidden;
-      }
-      .modalHead{
-        display:flex;
-        align-items:center;
-        justify-content:space-between;
-        padding:12px 12px;
-        border-bottom:1px solid var(--border);
-      }
-      .modalTitle{
-        font-weight:800;
-        letter-spacing:-0.01em;
-      }
-      .closeBtn{
-        border:1px solid var(--border);
-        background:var(--soft);
-        color:#111827;
-        padding:8px 10px;
-        font-size:14px;
-        border-radius:12px;
-      }
-      .modalBody{
-        padding:12px;
-      }
-      video{
-        width:100%;
-        border-radius:12px;
-        border:1px solid var(--border);
-        background:#000;
-      }
-      .scanHint{
-        margin-top:10px;
-        color:var(--muted);
-        font-size:13px;
-        line-height:1.35;
-      }
-    </style>
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, sans-serif;
+      font-size: 16px;
+      line-height: 1.5;
+    }
 
-    <script src="https://unpkg.com/@zxing/browser@0.1.5/umd/zxing-browser.min.js"></script>
-    <script>
-      if (!window.ZXingBrowser) {
-        const s = document.createElement('script');
-        s.src = "https://cdn.jsdelivr.net/npm/@zxing/browser@0.1.5/umd/zxing-browser.min.js";
-        document.head.appendChild(s);
-      }
-    </script>
-  </head>
+    .page {
+      width: 100%;
+      max-width: 420px;
+      margin: 0 auto;
+      padding: 20px 14px 48px;
+    }
 
-  <body>
-    <div class="page">
-      <h2>Stock Entry</h2>
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+      padding: 0 2px;
+    }
 
-      <div class="card">
-        <div class="field">
-          <div class="label">Barcode (แตะช่องนี้แล้วสแกน)</div>
-          <div class="inlineRow">
-            <input id="barcode" type="tel" inputmode="numeric" pattern="[0-9]*"
-                   placeholder="Scan barcode..." autocomplete="off" style="flex:1;">
-            <button class="iconBtn" type="button" onclick="openScan()" aria-label="Scan EAN13">📷</button>
-          </div>
+    .logo {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      object-fit: cover;
+    }
+
+    .header-text h1 {
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      color: var(--accent);
+      line-height: 1.1;
+    }
+
+    .header-text p {
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .card-title {
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      margin-bottom: 16px;
+    }
+
+    .field { margin-bottom: 14px; }
+    .field:last-child { margin-bottom: 0; }
+
+    label {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 14px;
+      font-size: 18px;
+      font-weight: 500;
+      font-family: inherit;
+      outline: none;
+      background: var(--surface);
+      color: var(--text);
+      transition: border-color 0.12s;
+      -webkit-appearance: none;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--accent-mid);
+      box-shadow: 0 0 0 3px rgba(37,99,235,0.12);
+    }
+
+    input[readonly] {
+      background: var(--bg);
+      color: var(--muted);
+      font-size: 16px;
+    }
+
+    select:disabled, input:disabled {
+      background: var(--bg);
+      color: #94a3b8;
+    }
+
+    textarea { min-height: 70px; resize: vertical; font-size: 16px; }
+
+    .row2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .scan-row {
+      display: flex;
+      gap: 8px;
+      align-items: stretch;
+    }
+
+    .scan-row input { flex: 1; }
+
+    .scan-btn {
+      min-width: 52px;
+      padding: 0 14px;
+      border: 1.5px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      border-radius: 10px;
+      font-size: 22px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      white-space: nowrap;
+    }
+
+    .scan-btn:active { background: var(--bg); }
+
+    .btn-group {
+      display: flex;
+      gap: 8px;
+      margin-top: 18px;
+    }
+
+    button {
+      font-family: inherit;
+      cursor: pointer;
+    }
+
+    .btn {
+      flex: 1;
+      padding: 14px 10px;
+      font-size: 16px;
+      font-weight: 700;
+      border-radius: 10px;
+      border: none;
+      letter-spacing: 0.01em;
+    }
+
+    .btn:active { transform: scale(0.98); }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .btn-ghost {
+      background: var(--bg);
+      color: var(--text);
+      border: 1.5px solid var(--border);
+    }
+
+    .status-bar {
+      min-height: 22px;
+      padding: 10px 0 0;
+      font-size: 15px;
+      font-weight: 600;
+      line-height: 1.3;
+    }
+
+    .ok { color: var(--success); }
+    .err { color: var(--danger); }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin: 8px 2px 10px;
+    }
+
+    .section-title {
+      font-size: 17px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .badge {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 3px 12px;
+    }
+
+    table { width: 100%; border-collapse: collapse; }
+
+    th {
+      position: sticky;
+      top: 0;
+      background: var(--surface);
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+      padding: 10px 8px;
+      border-bottom: 1.5px solid var(--border);
+      z-index: 1;
+      text-align: left;
+    }
+
+    td {
+      padding: 10px 8px;
+      font-size: 14px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+
+    tr:last-child td { border-bottom: none; }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.55);
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+      z-index: 9999;
+    }
+
+    .modal.open { display: flex; }
+
+    .modal-sheet {
+      width: 100%;
+      max-width: 480px;
+      background: var(--surface);
+      border-radius: 20px 20px 0 0;
+      border-top: 1px solid var(--border);
+      overflow: hidden;
+      padding-bottom: env(safe-area-inset-bottom, 0);
+    }
+
+    .modal-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 16px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .modal-title {
+      font-size: 17px;
+      font-weight: 800;
+      letter-spacing: -0.01em;
+    }
+
+    .close-btn {
+      padding: 8px 18px;
+      font-size: 15px;
+      font-weight: 600;
+      border: 1.5px solid var(--border);
+      background: var(--bg);
+      color: var(--text);
+      border-radius: 8px;
+    }
+
+    .modal-body { padding: 14px; }
+
+    video {
+      width: 100%;
+      border-radius: 10px;
+      background: #000;
+      display: block;
+      min-height: 240px;
+    }
+
+    .scan-hint {
+      margin-top: 10px;
+      font-size: 14px;
+      color: var(--muted);
+      text-align: center;
+    }
+  </style>
+
+  <script src="https://unpkg.com/@zxing/browser@0.1.5/umd/zxing-browser.min.js"
+    onerror="loadZXingFallback()"></script>
+  <script>
+    function loadZXingFallback() {
+      const s = document.createElement('script');
+      s.src = 'https://cdn.jsdelivr.net/npm/@zxing/browser@0.1.5/umd/zxing-browser.min.js';
+      document.head.appendChild(s);
+    }
+  </script>
+</head>
+
+<body>
+  <div class="page">
+
+    <div class="header">
+      <img src="icon.png" class="logo" alt="ANMEC" onerror="this.style.display='none'">
+      <div class="header-text">
+        <h1>ANMEC Stock</h1>
+        <p>Warehouse Management</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">บันทึกรายการ</div>
+
+      <div class="field">
+        <label>บาร์โค้ด / QR Code</label>
+        <div class="scan-row">
+          <input id="barcode" type="text" inputmode="text"
+            placeholder="สแกนหรือพิมพ์รหัสสินค้า" autocomplete="off">
+          <button class="scan-btn" type="button" onclick="openScan()" title="เปิดกล้องสแกน">
+            📷
+          </button>
         </div>
+      </div>
 
-        <!-- ✅ NEW: Show SKU/Name -->
-        <div class="row2">
-          <div class="field">
-            <div class="label">SKU (auto)</div>
-            <input id="sku" type="text" placeholder="-" readonly>
-          </div>
-          <div class="field">
-            <div class="label">Name (auto)</div>
-            <input id="pname" type="text" placeholder="-" readonly>
-          </div>
-        </div>
-
+      <div class="row2">
         <div class="field">
-          <div class="label">Type</div>
-          <select id="type">
-            <option value="IN_PURCHASE">IN_PURCHASE (EXT → WH)</option>
-            <option value="IN_RETURN">IN_RETURN (CUS → WH)</option>
-            <option value="OUT_SALE">OUT_SALE (WH → CUS)</option>
-            <option value="OUT_LOAN">OUT_LOAN (WH → EXT)</option>
-            <option value="TRANSFER">TRANSFER (WH → WH)</option>
-            <option value="ADJ_PLUS">ADJ_PLUS (EXT → WH)</option>
-            <option value="ADJ_MINUS">ADJ_MINUS (WH → EXT)</option>
+          <label>SKU</label>
+          <input id="sku" type="text" placeholder="—" readonly>
+        </div>
+        <div class="field">
+          <label>ชื่อสินค้า</label>
+          <input id="pname" type="text" placeholder="—" readonly>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>ประเภทรายการ</label>
+        <select id="type">
+          <option value="IN_PURCHASE">รับเข้า — ซื้อจากผู้ขาย</option>
+          <option value="IN_RETURN">รับคืน — ลูกค้าคืนสินค้า</option>
+          <option value="OUT_SALE">จ่ายออก — ขายให้ลูกค้า</option>
+          <option value="OUT_LOAN">ยืมออก — ให้ยืมชั่วคราว</option>
+          <option value="TRANSFER">โอนย้าย — ระหว่างคลัง</option>
+          <option value="ADJ_PLUS">ปรับเพิ่ม</option>
+          <option value="ADJ_MINUS">ปรับลด</option>
+        </select>
+      </div>
+
+      <div class="row2">
+        <div class="field">
+          <label>คลังต้นทาง</label>
+          <select id="whFrom">
+            <option value="">(ไม่ระบุ)</option>
+            <option value="BKK">BKK — กรุงเทพ</option>
+            <option value="CHB">CHB — ชลบุรี</option>
           </select>
         </div>
-
-        <div class="row2">
-          <div class="field">
-            <div class="label">WH From</div>
-            <select id="whFrom">
-              <option value="">(auto/none)</option>
-              <option value="BKK">BKK</option>
-              <option value="CHB">CHB</option>
-            </select>
-          </div>
-
-          <div class="field">
-            <div class="label">WH To</div>
-            <select id="whTo">
-              <option value="">(auto/none)</option>
-              <option value="BKK">BKK</option>
-              <option value="CHB">CHB</option>
-            </select>
-          </div>
-        </div>
-
         <div class="field">
-          <div class="label">Qty</div>
-          <input id="qty" type="tel" inputmode="numeric" pattern="[0-9]*" placeholder="Qty">
+          <label>คลังปลายทาง</label>
+          <select id="whTo">
+            <option value="">(ไม่ระบุ)</option>
+            <option value="BKK">BKK — กรุงเทพ</option>
+            <option value="CHB">CHB — ชลบุรี</option>
+          </select>
         </div>
-
-        <div class="field">
-          <div class="label">Note</div>
-          <textarea id="note" placeholder="Optional note..."></textarea>
-        </div>
-
-        <div class="actionsLabel">Actions</div>
-        <div class="btnRow">
-          <button onclick="submitEntry()">Save</button>
-          <button onclick="refresh()">Refresh</button>
-          <button onclick="clearForm()">Clear</button>
-        </div>
-
-        <div id="status" class="status"></div>
-        <div class="muted">Tip: หลัง Save ระบบจะเคลียร์ Barcode/Qty/Note (และ SKU/Name) แล้วโฟกัสกลับไปที่ Barcode ให้อัตโนมัติ</div>
       </div>
 
-      <div class="sectionTitle">
-        Recent Movements <span class="pill" id="badge">Loading...</span>
+      <div class="field">
+        <label>จำนวน</label>
+        <input id="qty" type="tel" inputmode="numeric" pattern="[0-9]*" placeholder="0">
       </div>
-      <div class="card" id="tableWrap">Loading...</div>
+
+      <div class="field">
+        <label>หมายเหตุ</label>
+        <textarea id="note" placeholder="(ไม่บังคับ)"></textarea>
+      </div>
+
+      <div class="btn-group">
+        <button class="btn btn-primary" onclick="submitEntry()">บันทึก</button>
+        <button class="btn btn-ghost" onclick="clearForm()">ล้าง</button>
+        <button class="btn btn-ghost" onclick="refresh()">รีเฟรช</button>
+      </div>
+
+      <div id="status" class="status-bar"></div>
     </div>
 
-    <div class="modal" id="scanModal" role="dialog" aria-modal="true" aria-label="Scan EAN-13">
-      <div class="modalCard">
-        <div class="modalHead">
-          <div class="modalTitle">Scan EAN-13</div>
-          <button class="closeBtn" type="button" onclick="closeScan()">Close</button>
-        </div>
-        <div class="modalBody">
-          <video id="scanVideo" playsinline></video>
-          <div class="scanHint">รองรับเฉพาะ Barcode_EAN13 (13 หลัก) เท่านั้น</div>
-        </div>
-      </div>
+    <div class="section-header">
+      <div class="section-title">รายการล่าสุด</div>
+      <span class="badge" id="badge">Loading...</span>
     </div>
 
-    <script>
-      const $ = (id) => document.getElementById(id);
-      const ENDPOINT = "/api/stock";
+    <div class="card" id="tableWrap" style="padding:14px;">Loading...</div>
 
-      function digitsOnly(el){
-        el.value = (el.value || '').replace(/\D+/g, '');
+  </div>
+
+  <div class="modal" id="scanModal" role="dialog" aria-modal="true">
+    <div class="modal-sheet">
+      <div class="modal-head">
+        <div class="modal-title">สแกน QR Code / Barcode</div>
+        <button class="close-btn" type="button" onclick="closeScan()">ปิด</button>
+      </div>
+      <div class="modal-body">
+        <video id="scanVideo" playsinline muted></video>
+        <div class="scan-hint">รองรับ QR Code, EAN-13 และ Barcode ทั่วไป</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const $ = id => document.getElementById(id);
+    const ENDPOINT = '/api/stock';
+
+    let lookupTimer = null;
+    let zxingControls = null;
+
+    // ---------- SKU lookup ----------
+
+    function clearSkuName() {
+      $('sku').value = '';
+      $('pname').value = '';
+    }
+
+    async function lookupSkuByBarcode(barcode) {
+      if (!barcode) { clearSkuName(); return; }
+      $('sku').value = '...';
+      $('pname').value = '...';
+      try {
+        const res = await fetch(`${ENDPOINT}?fn=lookupBarcode&barcode=${encodeURIComponent(barcode)}`);
+        const data = await res.json().catch(() => ({}));
+        if (!data.ok) throw new Error(data.error || 'Lookup failed');
+        $('sku').value = data.sku || 'ไม่พบ';
+        $('pname').value = data.name || '';
+      } catch (e) {
+        clearSkuName();
+        setStatus('Lookup error: ' + (e?.message || e), 'err');
       }
-      ['barcode','qty'].forEach(id => {
-        const el = $(id);
-        el.addEventListener('input', () => digitsOnly(el));
+    }
+
+    function scheduleLookup() {
+      clearTimeout(lookupTimer);
+      const val = $('barcode').value.trim();
+      lookupTimer = setTimeout(() => lookupSkuByBarcode(val), 250);
+    }
+
+    $('barcode').addEventListener('input', scheduleLookup);
+    $('barcode').addEventListener('change', scheduleLookup);
+
+    // ---------- Scanner ----------
+
+    function waitForZXing(ms = 4000) {
+      return new Promise((resolve, reject) => {
+        if (window.ZXingBrowser) return resolve();
+        const deadline = Date.now() + ms;
+        const t = setInterval(() => {
+          if (window.ZXingBrowser) { clearInterval(t); resolve(); }
+          else if (Date.now() > deadline) { clearInterval(t); reject(new Error('โหลด scanner library ไม่ได้')); }
+        }, 100);
       });
+    }
 
-      function ean13Valid(s){
-        if (!/^\d{13}$/.test(s)) return false;
-        let sum = 0;
-        for (let i = 0; i < 12; i++){
-          const n = s.charCodeAt(i) - 48;
-          sum += (i % 2 === 0) ? n : (n * 3);
-        }
-        const check = (10 - (sum % 10)) % 10;
-        return check === (s.charCodeAt(12) - 48);
-      }
-
-      // ✅ NEW: barcode -> lookup sku/name (debounced)
-      let lookupTimer = null;
-
-      function clearSkuName(){
-        $('sku').value = '';
-        $('pname').value = '';
-      }
-
-      async function lookupSkuByBarcode(barcode){
-        if (!ean13Valid(barcode)) {
-          clearSkuName();
-          return;
-        }
-
-        $('sku').value = 'Loading...';
-        $('pname').value = 'Loading...';
-
-        try{
-          const url = ENDPOINT + '?fn=lookupBarcode&barcode=' + encodeURIComponent(barcode);
-          const res = await fetch(url, { method:'GET' });
-          const data = await res.json().catch(() => ({}));
-          if (!data.ok) throw new Error(data.error || 'Lookup failed');
-
-          $('sku').value = data.sku || 'NOT FOUND';
-          $('pname').value = data.name || '';
-
-        }catch(e){
-          clearSkuName();
-          setStatus('Lookup error: ' + (e?.message || e), 'err');
-        }
-      }
-
-      function scheduleLookup(){
-        clearTimeout(lookupTimer);
-        lookupTimer = setTimeout(() => lookupSkuByBarcode($('barcode').value.trim()), 150);
-      }
-
-      $('barcode').addEventListener('input', scheduleLookup);
-      $('barcode').addEventListener('change', scheduleLookup);
-
-      let zxingReader = null;
-      let zxingControls = null;
-
-      async function openScan(){
-        try{
-          $('scanModal').classList.add('open');
-          setStatus('Opening camera...', '');
-
-          if (!window.ZXingBrowser) throw new Error('Scanner library not loaded');
-
-          zxingReader = zxingReader || new ZXingBrowser.BrowserMultiFormatReader();
-          const videoEl = $('scanVideo');
-
-          zxingControls = await zxingReader.decodeFromVideoDevice(
-            undefined,
-            videoEl,
-            (result, err, controls) => {
-              if (!zxingControls) zxingControls = controls || zxingControls;
-              if (result) {
-                const code = String(result.getText ? result.getText() : result.text || '').trim();
-                const digits = code.replace(/\D+/g, '');
-                if (ean13Valid(digits)) {
-                  $('barcode').value = digits;
-                  lookupSkuByBarcode(digits); // ✅ lookup immediately
-                  closeScan();
-                  setStatus('Scanned ✅', 'ok');
-                  $('qty').focus();
-                }
-              }
-            }
-          );
-
-          setStatus('Scanning...', '');
-        } catch (e){
-          closeScan();
-          setStatus('Camera error: ' + (e?.message || e), 'err');
-        }
-      }
-
-      function closeScan(){
-        $('scanModal').classList.remove('open');
-        try{
-          if (zxingControls && typeof zxingControls.stop === 'function') zxingControls.stop();
-        } catch(_){}
-        zxingControls = null;
-        const v = $('scanVideo');
-        try{
-          v.pause();
-          v.srcObject = null;
-        } catch(_){}
-      }
-
-      document.addEventListener('visibilitychange', () => {
-        if (document.hidden) closeScan();
-      });
-
-      $('scanModal').addEventListener('click', (e) => {
-        if (e.target && e.target.id === 'scanModal') closeScan();
-      });
-
-      function applyTypeRules() {
-        const t = $('type').value;
-        $('whFrom').disabled = false;
-        $('whTo').disabled = false;
-
-        if (['IN_PURCHASE','IN_RETURN','ADJ_PLUS'].includes(t)) {
-          $('whFrom').value = '';
-          $('whFrom').disabled = true;
-        } else if (['OUT_SALE','OUT_LOAN','ADJ_MINUS'].includes(t)) {
-          $('whTo').value = '';
-          $('whTo').disabled = true;
-        }
-      }
-      $('type').addEventListener('change', applyTypeRules);
-
-      function setStatus(msg, kind) {
-        const el = $('status');
-        el.className = 'status ' + (kind === 'ok' ? 'ok' : kind === 'err' ? 'err' : '');
-        el.textContent = msg || '';
-      }
-
-      function clearForm() {
+    async function openScan() {
+      $('scanModal').classList.add('open');
+      setStatus('กำลังเปิดกล้อง...', '');
+      try {
+        await waitForZXing();
+        const reader = new ZXingBrowser.BrowserMultiFormatReader();
+        zxingControls = await reader.decodeFromVideoDevice(
+          undefined,
+          $('scanVideo'),
+          (result, _err, controls) => {
+            if (!zxingControls) zxingControls = controls;
+            if (!result) return;
+            const code = String(result.getText ? result.getText() : (result.text || '')).trim();
+            if (!code) return;
+            $('barcode').value = code;
+            lookupSkuByBarcode(code);
+            closeScan();
+            setStatus('สแกนสำเร็จ ✓', 'ok');
+            $('qty').focus();
+          }
+        );
+        setStatus('กำลังสแกน — จ่อกล้องที่รหัส...', '');
+      } catch (e) {
         closeScan();
-        $('barcode').value = '';
-        $('qty').value = '';
-        $('note').value = '';
-        clearSkuName(); // ✅
-        $('barcode').focus();
-        setStatus('');
+        setStatus('เปิดกล้องไม่ได้: ' + (e?.message || e), 'err');
       }
+    }
 
-      function validate(payload) {
-        if (!payload.barcode) return 'Please scan/enter barcode';
-        if (!ean13Valid(payload.barcode)) return 'Barcode must be valid EAN-13 (13 digits)';
+    function closeScan() {
+      $('scanModal').classList.remove('open');
+      try { if (typeof zxingControls?.stop === 'function') zxingControls.stop(); } catch (_) {}
+      zxingControls = null;
+      const v = $('scanVideo');
+      try { v.pause(); v.srcObject = null; } catch (_) {}
+    }
 
-        // ✅ NEW: block save if sku not found
-        const sku = ($('sku')?.value || '').trim();
-        if (!sku || sku === 'NOT FOUND' || sku === 'Loading...') return 'SKU not found. Please add barcode to Products first.';
+    document.addEventListener('visibilitychange', () => { if (document.hidden) closeScan(); });
+    $('scanModal').addEventListener('click', e => { if (e.target.id === 'scanModal') closeScan(); });
 
-        if (!payload.type) return 'Please select Type';
+    // ---------- Type rules ----------
 
-        const q = Number(payload.qty);
-        if (!Number.isFinite(q) || q <= 0) return 'Qty must be > 0';
-
-        const t = payload.type;
-        const OWN = ['BKK','CHB'];
-
-        if (['IN_PURCHASE','IN_RETURN','ADJ_PLUS'].includes(t)) {
-          if (!OWN.includes(payload.whTo)) return `${t}: Choose WH_To (BKK/CHB)`;
-        }
-        if (['OUT_SALE','OUT_LOAN','ADJ_MINUS'].includes(t)) {
-          if (!OWN.includes(payload.whFrom)) return `${t}: Choose WH_From (BKK/CHB)`;
-        }
-        if (t === 'TRANSFER') {
-          if (!OWN.includes(payload.whFrom) || !OWN.includes(payload.whTo)) return 'TRANSFER: Choose both WH_From and WH_To';
-          if (payload.whFrom === payload.whTo) return 'TRANSFER: WH_From cannot equal WH_To';
-        }
-        return '';
+    function applyTypeRules() {
+      const t = $('type').value;
+      $('whFrom').disabled = false;
+      $('whTo').disabled = false;
+      if (['IN_PURCHASE', 'IN_RETURN', 'ADJ_PLUS'].includes(t)) {
+        $('whFrom').value = '';
+        $('whFrom').disabled = true;
+      } else if (['OUT_SALE', 'OUT_LOAN', 'ADJ_MINUS'].includes(t)) {
+        $('whTo').value = '';
+        $('whTo').disabled = true;
       }
+    }
 
-      async function submitEntry() {
-        applyTypeRules();
-        closeScan();
+    $('type').addEventListener('change', applyTypeRules);
 
-        const payload = {
-          barcode: $('barcode').value.trim(),
-          type: $('type').value,
-          whFrom: $('whFrom').value,
-          whTo: $('whTo').value,
-          qty: $('qty').value,
-          note: $('note').value.trim(),
-        };
+    // ---------- Status ----------
 
-        const err = validate(payload);
-        if (err) return setStatus(err, 'err');
+    function setStatus(msg, kind) {
+      const el = $('status');
+      el.className = 'status-bar' + (kind === 'ok' ? ' ok' : kind === 'err' ? ' err' : '');
+      el.textContent = msg || '';
+    }
 
-        setStatus('Saving...');
+    // ---------- Form actions ----------
 
-        try {
-          const body = new URLSearchParams(payload);
-          const res = await fetch(ENDPOINT, { method: 'POST', body });
-          const data = await res.json().catch(() => ({}));
-          if (!data.ok) throw new Error(data.error || 'Save failed');
+    function clearForm() {
+      closeScan();
+      ['barcode', 'qty', 'note'].forEach(id => $(id).value = '');
+      clearSkuName();
+      setStatus('');
+      $('barcode').focus();
+    }
 
-          setStatus('Saved ✅', 'ok');
-          $('barcode').value = '';
-          $('qty').value = '';
-          $('note').value = '';
-          clearSkuName(); // ✅
-          $('barcode').focus();
-          refresh();
-        } catch (e) {
-          setStatus('Error: ' + (e?.message || e), 'err');
-        }
+    function validate(p) {
+      if (!p.barcode) return 'กรุณาสแกนหรือระบุบาร์โค้ด';
+      const sku = ($('sku').value || '').trim();
+      if (!sku || sku === 'ไม่พบ' || sku === '...') return 'ไม่พบ SKU — กรุณาเพิ่มสินค้าก่อน';
+      const q = Number(p.qty);
+      if (!Number.isFinite(q) || q <= 0) return 'จำนวนต้องมากกว่า 0';
+      const OWN = ['BKK', 'CHB'];
+      const t = p.type;
+      if (['IN_PURCHASE', 'IN_RETURN', 'ADJ_PLUS'].includes(t) && !OWN.includes(p.whTo))
+        return `${t}: เลือกคลังปลายทาง (BKK / CHB)`;
+      if (['OUT_SALE', 'OUT_LOAN', 'ADJ_MINUS'].includes(t) && !OWN.includes(p.whFrom))
+        return `${t}: เลือกคลังต้นทาง (BKK / CHB)`;
+      if (t === 'TRANSFER') {
+        if (!OWN.includes(p.whFrom) || !OWN.includes(p.whTo)) return 'โอนย้าย: เลือกทั้งต้นทางและปลายทาง';
+        if (p.whFrom === p.whTo) return 'โอนย้าย: ต้นทางและปลายทางต้องต่างกัน';
       }
+      return '';
+    }
 
-      async function refresh() {
-        $('badge').textContent = 'Loading...';
-        try {
-          const url = ENDPOINT + '?fn=getRecentEntries&limit=30';
-          const res = await fetch(url, { method: 'GET' });
-          const data = await res.json();
-          renderTable(data);
-        } catch (e) {
-          $('tableWrap').textContent = 'Error loading: ' + (e?.message || e);
-          $('badge').textContent = 'Error';
-        }
-      }
-
-      function renderTable(data) {
-        const headers = data.headers || [];
-        const rows = data.rows || [];
-        $('badge').textContent = rows.length ? `${rows.length} rows` : '0 rows';
-
-        if (!rows.length) {
-          $('tableWrap').textContent = 'No movements yet.';
-          return;
-        }
-
-        let html = '<table><thead><tr>';
-        headers.forEach(h => html += `<th>${escapeHtml(String(h))}</th>`);
-        html += '</tr></thead><tbody>';
-
-        rows.forEach(r => {
-          html += '<tr>';
-          r.forEach(c => html += `<td>${escapeHtml(String(c ?? ''))}</td>`);
-          html += '</tr>';
-        });
-
-        html += '</tbody></table>';
-        $('tableWrap').innerHTML = html;
-      }
-
-      function escapeHtml(s) {
-        return s.replace(/[&<>"']/g, m => ({
-          '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'
-        }[m]));
-      }
-
-      window.onload = () => {
-        applyTypeRules();
+    async function submitEntry() {
+      applyTypeRules();
+      closeScan();
+      const p = {
+        barcode: $('barcode').value.trim(),
+        type:    $('type').value,
+        whFrom:  $('whFrom').value,
+        whTo:    $('whTo').value,
+        qty:     $('qty').value,
+        note:    $('note').value.trim(),
+      };
+      const err = validate(p);
+      if (err) return setStatus(err, 'err');
+      setStatus('กำลังบันทึก...');
+      try {
+        const res = await fetch(ENDPOINT, { method: 'POST', body: new URLSearchParams(p) });
+        const data = await res.json().catch(() => ({}));
+        if (!data.ok) throw new Error(data.error || 'Save failed');
+        setStatus('บันทึกสำเร็จ ✓', 'ok');
+        ['barcode', 'qty', 'note'].forEach(id => $(id).value = '');
+        clearSkuName();
         $('barcode').focus();
         refresh();
-      };
+      } catch (e) {
+        setStatus('Error: ' + (e?.message || e), 'err');
+      }
+    }
 
-      document.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' && e.target?.tagName !== 'TEXTAREA') submitEntry();
+    // ---------- Table ----------
+
+    async function refresh() {
+      $('badge').textContent = 'Loading...';
+      try {
+        const res = await fetch(`${ENDPOINT}?fn=getRecentEntries&limit=30`);
+        renderTable(await res.json());
+      } catch (e) {
+        $('tableWrap').textContent = 'โหลดข้อมูลไม่ได้: ' + (e?.message || e);
+        $('badge').textContent = 'Error';
+      }
+    }
+
+    function renderTable(data) {
+      const headers = data.headers || [];
+      const rows = data.rows || [];
+      $('badge').textContent = rows.length ? `${rows.length} รายการ` : '0 รายการ';
+      if (!rows.length) { $('tableWrap').textContent = 'ยังไม่มีรายการ'; return; }
+      const esc = s => String(s ?? '').replace(/[&<>"']/g,
+        m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m]));
+      let html = '<table><thead><tr>' +
+        headers.map(h => `<th>${esc(h)}</th>`).join('') +
+        '</tr></thead><tbody>';
+      rows.forEach(r => {
+        html += '<tr>' + r.map(c => `<td>${esc(c)}</td>`).join('') + '</tr>';
       });
-    </script>
-  </body>
+      $('tableWrap').innerHTML = html + '</tbody></table>';
+    }
+
+    window.onload = () => { applyTypeRules(); $('barcode').focus(); refresh(); };
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Enter' && e.target?.tagName !== 'TEXTAREA') submitEntry();
+    });
+  </script>
+</body>
 </html>
